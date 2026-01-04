@@ -38,12 +38,13 @@ const server = http.createServer(async (req, res) => {
 
   if (req.url === "/leaderboard" && req.method === "GET") {
     try {
-      const leaderboard = await getLeaderboard();
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(leaderboard));
+        const leaderboard = await getLeaderboard();
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(leaderboard));
     } catch (err) {
-      res.writeHead(500);
-      res.end("Error fetching leaderboard");
+        console.error("Leaderboard DB unavailable, returning empty list");
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify([]));
     }
     return;
   }
