@@ -13,9 +13,9 @@ const waitingPlayers = [];
 // Active games stored in memory
 const activeGames = new Map();
 
-const wss = new WebSocket.Server({ port: 8080 });
+const PORT = process.env.PORT || 8080;
+const wss = new WebSocket.Server({ port: PORT });
 
-console.log('WebSocket server running on ws://localhost:8080');
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
@@ -295,6 +295,6 @@ const apiServer = http.createServer(async (req, res) => {
 });
 
 
-apiServer.listen(3001, () => {
+apiServer.listen(PORT + 1, () => {
   console.log("Leaderboard API running on http://localhost:3001/leaderboard");
 });
