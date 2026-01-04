@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
 
+const BACKEND_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:8080"
+    : "https://connect4-multiplayer-h1sc.onrender.com";
+
+const WS_URL =
+  window.location.hostname === "localhost"
+    ? "ws://localhost:8080"
+    : "wss://connect4-multiplayer-h1sc.onrender.com";
+
 function App() {
   const [username, setUsername] = useState("");
   const [ws, setWs] = useState(null);
@@ -8,10 +18,12 @@ function App() {
   const [status, setStatus] = useState("Not connected");
   const [leaderboard, setLeaderboard] = useState([]);
 
-  // Fetch leaderboard from backend
+  // -----------------------
+  // LOAD LEADERBOARD
+  // -----------------------
   const loadLeaderboard = async () => {
     try {
-      const res = await fetch("http://localhost:3001/leaderboard");
+      const res = await fetch(`${BACKEND_URL}/leaderboard`);
       const data = await res.json();
       setLeaderboard(data);
     } catch (err) {
@@ -19,15 +31,20 @@ function App() {
     }
   };
 
-  // LOAD LEADERBOARD ON PAGE LOAD
   useEffect(() => {
     loadLeaderboard();
   }, []);
 
+  // -----------------------
+  // CONNECT WEBSOCKET
+  // -----------------------
   const connect = () => {
-    if (!username) return alert("Enter username");
+    if (!username) {
+      alert("Enter username");
+      return;
+    }
 
-    const socket = new WebSocket("ws://localhost:8080");
+    const socket = new WebSocket(WS_URL);
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: "JOIN", username }));
@@ -52,17 +69,27 @@ function App() {
         } else {
           setStatus(`Winner: ${data.winner}`);
         }
-
-        // Reload leaderboard after game ends
         loadLeaderboard();
       }
+    };
+
+    socket.onerror = () => {
+      setStatus("Connection error");
+    };
+
+    socket.onclose = () => {
+      setStatus("Disconnected");
+      setWs(null);
     };
 
     setWs(socket);
   };
 
+  // -----------------------
+  // SEND MOVE
+  // -----------------------
   const makeMove = (col) => {
-    if (!ws) return;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify({ type: "MOVE", column: col }));
   };
 
