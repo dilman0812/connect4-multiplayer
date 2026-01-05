@@ -25,7 +25,7 @@ This project demonstrates **real-time systems**, **event-driven architecture**, 
 
 ### Persistence & Analytics
 - Active games stored **in memory**
-- Completed games persisted in **PostgreSQL**
+- Completed games persisted in **PostgreSQL** (local environment)
 - Event-driven analytics via **Kafka-compatible streaming**
 - Leaderboard derived from persisted game results
 
@@ -53,7 +53,7 @@ This separation ensures that real-time gameplay is never blocked by analytics or
                                              ▼
                                        ┌──────────┐
                                        │ Postgres │
-                                       │ (Games)  │
+                                       │ (Local)  │
                                        └──────────┘
                                              │
                                Kafka Events  │
@@ -62,6 +62,7 @@ This separation ensures that real-time gameplay is never blocked by analytics or
                                   │ Analytics       │
                                   │ Consumer        │
                                   └────────────────┘
+
 ```
 
 ## 🧾 Game State Handling
@@ -82,6 +83,7 @@ This separation ensures that real-time gameplay is never blocked by analytics or
 - Data is derived from persisted game records in PostgreSQL.
 - A read-only HTTP endpoint (`/leaderboard`) exposes aggregated results.
 - The frontend fetches and displays the leaderboard automatically after each game.
+- In the cloud deployment, the leaderboard endpoint returns an empty list due to the absence of a database.
 
 ## 💥 Analytics (Kafka)
 
@@ -133,6 +135,26 @@ connect4-multiplayer/
 └── README.md
 ```
 
+## 🌐 Cloud Deployment Notes
+
+The application is deployed on Render for demonstration purposes.
+
+- The **backend and frontend are live** and fully functional.
+- **PostgreSQL and Kafka are used in the local environment**.
+- In the cloud deployment:
+  - PostgreSQL is not provisioned.
+  - Kafka producers are automatically disabled via environment detection.
+  - The leaderboard API gracefully returns an empty list when the database is unavailable.
+
+This design keeps the deployed application **stateless, stable, and demo-friendly**, while preserving full persistence and analytics capabilities in local development.
+
+## 🌍 Live Demo
+
+- **Frontend (React UI):** https://connect4-multiplayer-1.onrender.com
+- **Backend (WebSocket + API):** https://connect4-multiplayer-h1sc.onrender.com
+- **Leaderboard API:** https://connect4-multiplayer-h1sc.onrender.com/leaderboard
+
+
 ## 🚀 How to Run Locally
 
 ### 1️⃣ Start Infrastructure (Kafka + Postgres)
@@ -157,9 +179,8 @@ node server.js
 
 Expected logs:
 ```
-WebSocket server running on ws://localhost:8080
+Server running on port 8080
 Kafka producer ready
-Leaderboard API running on http://localhost:3001/leaderboard
 ```
 
 ---
@@ -197,7 +218,7 @@ http://localhost:3000
    - Game result is shown immediately.
    - Leaderboard updates automatically.
    - Analytics events appear in the consumer logs.
-   - Game record is persisted in PostgreSQL.
+   - Game record is persisted in PostgreSQL (local environment).
 
 ---
 
